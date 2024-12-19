@@ -1,0 +1,103 @@
+package com.example.mygame;
+
+import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+
+import java.util.Random;
+
+public class MyGame extends ApplicationAdapter {
+    private SpriteBatch batch;
+    private Texture playerTexture;
+    private Texture npcTexture;
+    private int playerX, playerY;
+    private boolean interacting = false;
+    private String npcDialog = "Hello, Trainer! Ready for a battle?";
+    private BitmapFont font;
+    
+    private Random random;
+
+    @Override
+    public void create() {
+        batch = new SpriteBatch();
+        playerTexture = new Texture("player.png"); // Ensure you have a player.png in the assets folder
+        npcTexture = new Texture("npc.png"); // Ensure you have an npc.png in the assets folder
+        playerX = 100;
+        playerY = 100;
+        font = new BitmapFont(); // Default font
+        random = new Random();
+    }
+
+    @Override
+    public void render() {
+        handleInput();
+        
+        Gdx.gl.glClearColor(0.5f, 0.7f, 1, 1); // Sky blue background
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        batch.begin();
+        batch.draw(playerTexture, playerX, playerY); // Draw the player
+        drawNPC();
+
+        if (interacting) {
+            drawDialogue();
+        }
+        
+        batch.end();
+    }
+
+    private void handleInput() {
+        if (!interacting) {
+            if (Gdx.input.isKeyPressed(Input.Keys.W)) playerY += 2; // Move Up
+            if (Gdx.input.isKeyPressed(Input.Keys.A)) playerX -= 2; // Move Left
+            if (Gdx.input.isKeyPressed(Input.Keys.S)) playerY -= 2; // Move Down
+            if (Gdx.input.isKeyPressed(Input.Keys.D)) playerX += 2; // Move Right
+        }
+
+        // Check interaction with NPC
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E) && isNearNPC()) {
+            interacting = true;
+            initiateBattle();
+        }
+    }
+
+    private boolean isNearNPC() {
+        // Check if the player is near the NPC (example dimensions)
+        return playerX < 150 && playerX > 100 && playerY < 300 && playerY > 250;
+    }
+
+    private void drawNPC() {
+        if (playerX < 150 && playerX > 100 && playerY < 300 && playerY > 250) {
+            batch.draw(npcTexture, 125, 250); // Draw NPC
+        }
+    }
+
+    private void drawDialogue() {
+        GlyphLayout layout = new GlyphLayout(font, npcDialog);
+        font.draw(batch, npcDialog, 400 - layout.width / 2, 200); // Centered dialogue
+    }
+
+    private void initiateBattle() {
+        if (random.nextBoolean()) { // Random encounter
+            // Simplified battle logic
+            String battleOutcome = "A wild Pokémon appears!";
+            System.out.println(battleOutcome); // For demonstration; replace with actual battle logic
+            interacting = false;
+        } else {
+            System.out.println("No Pokémon appeared."); // For demonstration; replace with logic
+        }
+    }
+
+    @Override
+    public void dispose() {
+        batch.dispose();
+        playerTexture.dispose();
+        npcTexture.dispose();
+        font.dispose();
+    }
+}
